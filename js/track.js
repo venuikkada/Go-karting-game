@@ -9,17 +9,20 @@ const LAYOUT = [
   [20, 330], [-60, 260], [-170, 280], [-280, 240], [-320, 120], [-260, 20],
   [-300, -90], [-240, -180], [-130, -210],
 ];
-const SCALE = 0.9;
+const SCALE = 1.1;
 
-export const TRACK_HALF_WIDTH = 10;
+export const TRACK_HALF_WIDTH = 17;
 export const CURB_WIDTH = 1.6;
-export const WALL_DIST = 24;
+export const WALL_DIST = 21;
+// Paved apron beyond the barrier so no grass touches the circuit.
+export const APRON_DIST = 27;
 
 export class Track {
   constructor() {
     this.halfWidth = TRACK_HALF_WIDTH;
     this.curbWidth = CURB_WIDTH;
     this.wallDist = WALL_DIST;
+    this.apronDist = APRON_DIST;
 
     const pts = LAYOUT.map(([x, z]) => new THREE.Vector3(x * SCALE, 0, z * SCALE));
     this.curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
@@ -64,8 +67,8 @@ export class Track {
 
     // Boost pads: [fraction of lap, lateral offset]
     this.boostPads = [
-      [0.07, 0], [0.235, -4], [0.415, 4], [0.58, 0], [0.74, -4], [0.9, 4],
-    ].map(([f, lat]) => ({ s: f * this.length, lat, len: 9, halfW: 3 }));
+      [0.07, 0], [0.235, -8], [0.415, 8], [0.58, 0], [0.74, -8], [0.9, 8],
+    ].map(([f, lat]) => ({ s: f * this.length, lat, len: 11, halfW: 4 }));
   }
 
   wrapS(s) {
@@ -180,20 +183,22 @@ export class Track {
       group.add(m);
     }
 
-    // Runoff verge: a slightly darker band of grass/sand between curb and wall.
+    // Paved runoff from the curb, under the barrier and out to the apron edge —
+    // no grass beside the road.
     const vergeTex = canvasTexture(128, 128, (g, w, h) => {
-      g.fillStyle = theme.verge; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#2f3237'; g.fillRect(0, 0, w, h);
       const r = mulberry32(7);
-      for (let i = 0; i < 1600; i++) {
-        g.fillStyle = `rgba(${r() < 0.5 ? '0,0,0' : '255,255,255'},${0.04 + r() * 0.06})`;
-        g.fillRect(r() * w, r() * h, 2, 2);
+      for (let i = 0; i < 2600; i++) {
+        const v = Math.floor(35 + r() * 40);
+        g.fillStyle = `rgba(${v},${v},${v + 4},${0.3 + r() * 0.4})`;
+        g.fillRect(r() * w, r() * h, 1.5, 1.5);
       }
     });
-    const vergeMat = new THREE.MeshStandardMaterial({ map: vergeTex, roughness: 1 });
+    const vergeMat = new THREE.MeshStandardMaterial({ map: vergeTex, roughness: 0.95 });
     for (const side of [-1, 1]) {
       const a = side * (this.halfWidth + this.curbWidth);
-      const b = side * (this.wallDist + 1);
-      const m = new THREE.Mesh(this.ribbon(Math.min(a, b), Math.max(a, b), 0.01, 10, 0.2), vergeMat);
+      const b = side * this.apronDist;
+      const m = new THREE.Mesh(this.ribbon(Math.min(a, b), Math.max(a, b), 0.015, 10, 0.2), vergeMat);
       m.receiveShadow = true;
       group.add(m);
     }
@@ -301,8 +306,8 @@ export class Track {
     // Painted starting grid slots.
     const slotMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 });
     for (let k = 0; k < 8; k++) {
-      const gs = this.sample(-12 - k * 7, (k % 2 ? 1 : -1) * 4.5);
-      const bar = new THREE.Mesh(new THREE.PlaneGeometry(4, 0.3).rotateX(-Math.PI / 2), slotMat);
+      const gs = this.sample(-12 - k * 7, (k % 2 ? 1 : -1) * 6);
+      const bar = new THREE.Mesh(new THREE.PlaneGeometry(5, 0.3).rotateX(-Math.PI / 2), slotMat);
       bar.position.set(gs.x, 0.035, gs.z);
       bar.rotation.y = gs.heading;
       group.add(bar);

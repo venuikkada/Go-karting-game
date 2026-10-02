@@ -86,6 +86,8 @@ function makeGround(theme) {
   const geo = new THREE.PlaneGeometry(7000, 7000);
   geo.rotateX(-Math.PI / 2);
   const m = new THREE.Mesh(geo, mat);
+  // Sit well below the paved surfaces so the grass can never z-fight through the road.
+  m.position.y = -0.25;
   m.receiveShadow = true;
   return m;
 }
@@ -126,14 +128,14 @@ function makeMountains(theme, rnd) {
 function makeLake(track, theme) {
   // Pick the open spot furthest from the circuit within the infield region.
   let best = null;
-  for (let x = -400; x <= 400; x += 20) {
-    for (let z = -300; z <= 450; z += 20) {
+  for (let x = -480; x <= 480; x += 20) {
+    for (let z = -360; z <= 540; z += 20) {
       const d = track.distanceTo(x, z);
       if (!best || d > best.d) best = { x, z, d };
     }
   }
-  if (!best || best.d < 50) return null;
-  const r = Math.min(best.d - 35, 140);
+  if (!best || best.d < 60) return null;
+  const r = Math.min(best.d - track.apronDist - 18, 140);
   const geo = new THREE.CircleGeometry(r, 48);
   geo.rotateX(-Math.PI / 2);
   const mat = new THREE.MeshStandardMaterial({
@@ -161,7 +163,7 @@ function makeTrees(track, theme, rnd, lake) {
     const x = (rnd() - 0.5) * 1700;
     const z = (rnd() - 0.5) * 1500 + 100;
     const d = track.distanceTo(x, z);
-    if (d < 36) continue;
+    if (d < track.apronDist + 12) continue;
     if (lake && Math.hypot(x - lake.userData.x, z - lake.userData.z) < lake.userData.r) continue;
     // Denser near the track for a sense of speed.
     if (d > 120 && rnd() < 0.55) continue;

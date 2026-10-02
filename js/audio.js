@@ -68,7 +68,7 @@ export class GameAudio {
     const t = this.ctx.currentTime;
     const sp = Math.abs(kart.speed);
     // Simulated gearbox for a satisfying rev curve.
-    const gears = [0, 12, 22, 32, 42, 54, 80];
+    const gears = [0, 16, 30, 44, 58, 72, 100];
     let gi = 1;
     while (gi < gears.length - 1 && sp > gears[gi]) gi++;
     const lo = gears[gi - 1], hi = gears[gi];

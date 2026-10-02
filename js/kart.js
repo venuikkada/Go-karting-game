@@ -3,10 +3,10 @@ import { clamp, damp, lerp, sign } from './utils.js';
 
 // Tunables — arcade feel inspired by mobile racers: fast, grippy, rewarding drifts.
 export const PHYS = {
-  maxSpeed: 46,          // m/s (~165 km/h shown)
-  nitroSpeed: 64,        // m/s while boosting (~230 km/h)
-  accel: 22,
-  nitroAccel: 34,
+  maxSpeed: 62,          // m/s (~225 km/h shown)
+  nitroSpeed: 86,        // m/s while boosting (~310 km/h)
+  accel: 32,
+  nitroAccel: 48,
   brake: 55,
   reverseMax: 12,
   reverseAccel: 18,
@@ -115,7 +115,7 @@ export class Kart {
 
     // --- Surface ---
     const absLat = Math.abs(this.lat);
-    this.offroad = absLat > track.halfWidth + track.curbWidth + 0.3;
+    this.offroad = absLat > track.apronDist; // everything inside the barriers is paved
     this.onCurb = !this.offroad && absLat > track.halfWidth;
 
     // --- Boosts ---

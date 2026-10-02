@@ -161,6 +161,7 @@ function buildWorld() {
   }
 
   setupComposer();
+  game.scene = scene;
   builtTheme = theme.name;
   builtQuality = settings.quality;
 }
@@ -251,7 +252,7 @@ function setupRace() {
       const skill = lerp(s1, s0, slot / (KART_COUNT - 1)) + rand(-0.01, 0.01);
       game.ais.push(new AIDriver(kart, track, skill, slot + 1));
     }
-    kart.placeAt(track, -12 - slot * 7, (slot % 2 ? 1 : -1) * 4.5);
+    kart.placeAt(track, -12 - slot * 7, (slot % 2 ? 1 : -1) * 6);
     kart.lap = -1;
     kart.progress = kart.lap * track.length + kart.s;
     kart.maxLap = -1;

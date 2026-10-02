@@ -9,7 +9,7 @@ export class AIDriver {
     this.track = track;
     this.skill = skill;
     this.seed = seed;
-    this.laneBase = ((seed * 7919) % 9) - 4; // preferred lane -4..4
+    this.laneBase = (((seed * 7919) % 9) - 4) * 2; // preferred lane -8..8
     this.lane = this.laneBase;
     this.nitroCooldown = 3 + (seed % 3);
     this.stuckTime = 0;
@@ -29,7 +29,7 @@ export class AIDriver {
 
     // Racing line: drift to the inside ahead of corners.
     const turn = tr.turnAhead(k.s + 10, 45);
-    let targetLane = this.laneBase * 0.5 + clamp(-turn * 5, -6, 6) + Math.sin(time * 0.25 + this.seed) * 1.5;
+    let targetLane = this.laneBase * 0.5 + clamp(-turn * 9, -11, 11) + Math.sin(time * 0.25 + this.seed) * 1.5;
 
     // Avoid karts directly ahead.
     for (const o of karts) {
@@ -37,7 +37,7 @@ export class AIDriver {
       let ds = o.s - k.s;
       if (ds < -tr.length / 2) ds += tr.length;
       if (ds > tr.length / 2) ds -= tr.length;
-      if (ds > 0 && ds < 14 && Math.abs(o.lat - this.lane) < 3.2) {
+      if (ds > 0 && ds < 14 && Math.abs(o.lat - this.lane) < 3.5) {
         targetLane = o.lat + (o.lat > 0 ? -4.5 : 4.5);
       }
     }
