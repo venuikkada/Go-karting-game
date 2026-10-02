@@ -1,0 +1,27 @@
+# Hostinger / Apache config for Turbo Kart
+
+# Force HTTPS (needed for app install + tilt steering)
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Correct MIME types for ES modules and the PWA manifest
+AddType application/javascript .js .mjs
+AddType application/manifest+json .webmanifest
+AddType image/svg+xml .svg
+
+DirectoryIndex index.html
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/manifest+json image/svg+xml
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Service worker and HTML must always be fresh so updates ship immediately
+  <FilesMatch "(sw\.js|index\.html|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.(png|svg)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+</IfModule>
