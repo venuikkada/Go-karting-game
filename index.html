@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0d16" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Turbo Kart" />
+  <meta name="description" content="Turbo Kart: Velocity — a high-speed 3D go-kart racer with drifting, nitro and rivals. Play free in your browser or install on your phone." />
+  <title>Turbo Kart: Velocity</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <canvas id="speedlines"></canvas>
+  <div id="vignette"></div>
+  <div id="flash"></div>
+
+  <!-- ===== HUD ===== -->
+  <div id="hud" class="hidden">
+    <div class="hud-tl">
+      <div id="pos"><span id="pos-num">1</span><span id="pos-suf">st</span><span id="pos-of">/6</span></div>
+      <div id="lap">LAP <b id="lap-num">1</b>/<span id="lap-total">3</span></div>
+      <div id="timer">0:00.000</div>
+      <div id="best">BEST --:--.---</div>
+    </div>
+    <canvas id="minimap" width="200" height="200"></canvas>
+    <div id="leaderboard"></div>
+    <div class="hud-br">
+      <canvas id="speedo" width="260" height="260"></canvas>
+    </div>
+    <div id="drift-meter"><div id="drift-fill"></div><span id="drift-label">DRIFT</span></div>
+    <div id="msg"></div>
+    <div id="countdown"></div>
+    <div id="wrongway">WRONG WAY</div>
+  </div>
+
+  <!-- ===== Touch controls ===== -->
+  <div id="touch" class="hidden">
+    <div id="steer-zone"><div class="steer-arrow left">◀</div><div id="steer-knob"></div><div class="steer-arrow right">▶</div></div>
+    <div id="touch-right">
+      <button id="btn-nitro" class="tbtn nitro"><span>N2O</span><i id="nitro-btn-fill"></i></button>
+      <button id="btn-drift" class="tbtn drift">DRIFT</button>
+      <button id="btn-brake" class="tbtn brake">BRAKE</button>
+      <button id="btn-gas" class="tbtn gas hidden">GAS</button>
+    </div>
+    <button id="btn-pause" class="tsmall">❚❚</button>
+    <button id="btn-camera" class="tsmall cam">🎥</button>
+  </div>
+
+  <!-- ===== Main menu ===== -->
+  <div id="menu" class="screen">
+    <div class="menu-bg"></div>
+    <div class="menu-inner">
+      <h1 class="logo"><span>TURBO</span> KART<small>VELOCITY</small></h1>
+      <div class="menu-grid">
+        <div class="opt">
+          <label>KART COLOR</label>
+          <div id="colors" class="swatches"></div>
+        </div>
+        <div class="opt">
+          <label>LAPS</label>
+          <div class="seg" data-key="laps"><button data-v="1">1</button><button data-v="3" class="on">3</button><button data-v="5">5</button></div>
+        </div>
+        <div class="opt">
+          <label>DIFFICULTY</label>
+          <div class="seg" data-key="difficulty"><button data-v="easy">ROOKIE</button><button data-v="normal" class="on">PRO</button><button data-v="hard">LEGEND</button></div>
+        </div>
+        <div class="opt">
+          <label>TIME OF DAY</label>
+          <div class="seg" data-key="time"><button data-v="day" class="on">DAY</button><button data-v="sunset">SUNSET</button><button data-v="night">NIGHT</button></div>
+        </div>
+        <div class="opt">
+          <label>GRAPHICS</label>
+          <div class="seg" data-key="quality"><button data-v="low">LOW</button><button data-v="medium">MED</button><button data-v="high">HIGH</button></div>
+        </div>
+        <div class="opt touch-only">
+          <label>STEERING</label>
+          <div class="seg" data-key="steer"><button data-v="touch" class="on">TOUCH</button><button data-v="tilt">TILT</button></div>
+        </div>
+        <div class="opt touch-only">
+          <label>ACCELERATION</label>
+          <div class="seg" data-key="autoAccel"><button data-v="on" class="on">AUTO</button><button data-v="off">MANUAL</button></div>
+        </div>
+      </div>
+      <button id="btn-start" class="cta">RACE!</button>
+      <div class="controls-help desktop-only">
+        <span><kbd>W</kbd><kbd>↑</kbd> Gas</span>
+        <span><kbd>S</kbd><kbd>↓</kbd> Brake</span>
+        <span><kbd>A</kbd><kbd>D</kbd> Steer</span>
+        <span><kbd>Space</kbd> Drift</span>
+        <span><kbd>Shift</kbd> Nitro</span>
+        <span><kbd>C</kbd> Camera</span>
+        <span><kbd>R</kbd> Reset</span>
+        <span><kbd>P</kbd> Pause</span>
+      </div>
+      <div class="controls-help touch-only">Drag the left pad to steer · hold DRIFT in corners to charge nitro · tap N2O to boost</div>
+      <div id="install-hint" class="hidden"><button id="btn-install" class="ghost">📲 Install app</button></div>
+    </div>
+  </div>
+
+  <!-- ===== Pause ===== -->
+  <div id="pause" class="screen hidden">
+    <div class="panel">
+      <h2>PAUSED</h2>
+      <button id="btn-resume" class="cta">RESUME</button>
+      <button id="btn-restart" class="ghost">RESTART</button>
+      <button id="btn-calibrate" class="ghost touch-only">RE-CENTER TILT</button>
+      <button id="btn-mute" class="ghost">SOUND: ON</button>
+      <button id="btn-quit" class="ghost">MAIN MENU</button>
+    </div>
+  </div>
+
+  <!-- ===== Results ===== -->
+  <div id="results" class="screen hidden">
+    <div class="panel wide">
+      <h2 id="result-title">FINISH!</h2>
+      <table id="result-table"></table>
+      <div class="row">
+        <button id="btn-again" class="cta">RACE AGAIN</button>
+        <button id="btn-menu" class="ghost">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rotate" class="screen hidden"><div class="panel"><div class="rot-icon">📱↻</div><h2>ROTATE YOUR PHONE</h2><p>Turbo Kart plays best in landscape.</p><button id="btn-portrait" class="ghost">Play anyway</button></div></div>
+
+  <div id="loading" class="screen"><div class="spinner"></div><p>Building the circuit…</p></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
