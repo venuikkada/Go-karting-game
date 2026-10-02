@@ -59,6 +59,7 @@ export class GameAudio {
     this.skid = mkNoise('bandpass', 1400, 3);
     this.nitro = mkNoise('highpass', 900, 0.7);
     this.wind = mkNoise('lowpass', 500, 0.5);
+    this.crowd = mkNoise('bandpass', 700, 0.6); // distant grandstand roar
   }
 
   setVolume(v) { if (this.master) this.master.gain.value = v; }
@@ -68,7 +69,7 @@ export class GameAudio {
     const t = this.ctx.currentTime;
     const sp = Math.abs(kart.speed);
     // Simulated gearbox for a satisfying rev curve.
-    const gears = [0, 16, 30, 44, 58, 72, 100];
+    const gears = [0, 18, 36, 54, 70, 88, 120];
     let gi = 1;
     while (gi < gears.length - 1 && sp > gears[gi]) gi++;
     const lo = gears[gi - 1], hi = gears[gi];
@@ -85,6 +86,8 @@ export class GameAudio {
     this.skid.f.frequency.setTargetAtTime(1100 + sp * 12, t, 0.1);
     this.nitro.g.gain.setTargetAtTime(kart.isBoosting ? 0.13 : 0, t, 0.08);
     this.wind.g.gain.setTargetAtTime(Math.min(0.12, sp * 0.002), t, 0.2);
+    // Crowd swells and fades like a real GP grandstand.
+    this.crowd.g.gain.setTargetAtTime(0.035 + 0.025 * Math.sin(t * 0.7) + (kart.isBoosting ? 0.02 : 0), t, 0.5);
   }
 
   blip(freq, dur = 0.15, type = 'square', vol = 0.25) {
@@ -146,6 +149,6 @@ export class GameAudio {
   silence() {
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
-    for (const g of [this.engGain, this.skid.g, this.nitro.g, this.wind.g]) g.gain.setTargetAtTime(0, t, 0.05);
+    for (const g of [this.engGain, this.skid.g, this.nitro.g, this.wind.g, this.crowd.g]) g.gain.setTargetAtTime(0, t, 0.05);
   }
 }

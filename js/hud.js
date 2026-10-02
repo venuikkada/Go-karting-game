@@ -128,7 +128,7 @@ export class HUD {
     const W = 260, cx = 130, cy = 140, R = 104;
     g.clearRect(0, 0, W, W);
     const kmh = Math.abs(p.speed) * 3.6;
-    const maxK = 340;
+    const maxK = 400;
     const a0 = Math.PI * 0.75, a1 = Math.PI * 2.25;
     const frac = clamp(kmh / maxK, 0, 1);
 

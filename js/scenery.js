@@ -19,6 +19,7 @@ export function buildScenery(scene, track, theme) {
   group.add(makeLamps(track, theme));
   group.add(makeFlags(track, rnd));
   group.add(makeTireStacks(track, rnd));
+  group.add(makeArches(track, theme));
   if (theme.name !== 'night') group.add(makeClouds(theme, rnd));
   return group;
 }
@@ -72,16 +73,19 @@ function makeSky(theme) {
 
 function makeGround(theme) {
   const tex = canvasTexture(256, 256, (g, w, h) => {
-    g.fillStyle = theme.grass;
+    // Paved paddock (concrete slabs) instead of grass — a proper GP karting venue.
+    g.fillStyle = theme.name === 'night' ? '#3a3d44' : '#7d8088';
     g.fillRect(0, 0, w, h);
     const r = mulberry32(11);
     for (let i = 0; i < 9000; i++) {
-      const light = r() < 0.5;
-      g.fillStyle = light ? `rgba(255,255,200,${r() * 0.07})` : `rgba(0,30,0,${r() * 0.12})`;
-      g.fillRect(r() * w, r() * h, 1 + r() * 3, 1 + r() * 3);
+      const v = Math.floor(90 + r() * 80);
+      g.fillStyle = `rgba(${v},${v},${v + 6},${r() * 0.18})`;
+      g.fillRect(r() * w, r() * h, 1 + r() * 2, 1 + r() * 2);
     }
-  }, { repeat: [600, 600] });
-  // Large-scale variation so the grass doesn't look tiled from far away.
+    g.strokeStyle = 'rgba(0,0,0,0.25)';
+    g.lineWidth = 2;
+    g.strokeRect(0, 0, w, h); // slab joints
+  }, { repeat: [700, 700] });
   const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 1 });
   const geo = new THREE.PlaneGeometry(7000, 7000);
   geo.rotateX(-Math.PI / 2);
@@ -476,11 +480,13 @@ function makeFlags(track, rnd) {
 }
 
 function makeTireStacks(track, rnd) {
-  // Tyre walls on the outside of the sharpest corners.
+  // Tyre walls lining the barriers (denser through the corners).
   const spots = [];
   for (let i = 0; i < track.N; i += 6) {
     const turn = track.turnAhead(i * track.step, 30);
-    if (Math.abs(turn) > 0.55) spots.push({ s: i * track.step, side: turn > 0 ? -1 : 1 });
+    // Tyre walls on both sides all round the circuit, like a real kart track.
+    spots.push({ s: i * track.step, side: -1 }, { s: i * track.step, side: 1 });
+    if (Math.abs(turn) <= 0.55) i += 6;
   }
   const geo = new THREE.TorusGeometry(0.42, 0.2, 6, 10);
   geo.rotateX(Math.PI / 2);
@@ -528,5 +534,42 @@ function makeClouds(theme, rnd) {
     s.scale.set(sc, sc * 0.45, 1);
     group.add(s);
   }
+  return group;
+}
+
+// Overhead GP sponsor arches spanning the track.
+function makeArches(track, theme) {
+  const group = new THREE.Group();
+  const night = theme.name === 'night';
+  const texts = ['GP KARTING', 'TURBO GRAND PRIX', 'NITRO CUP', 'APEX RACING'];
+  const metal = new THREE.MeshStandardMaterial({ color: 0x23272f, metalness: 0.7, roughness: 0.35 });
+  const span = track.wallDist + 0.5;
+  texts.forEach((txt, i) => {
+    const tex = canvasTexture(1024, 128, (g, w, h) => {
+      const grd = g.createLinearGradient(0, 0, w, 0);
+      grd.addColorStop(0, '#d6161f'); grd.addColorStop(0.5, '#ff5a00'); grd.addColorStop(1, '#d6161f');
+      g.fillStyle = grd; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#fff';
+      g.font = 'italic 900 78px Arial Black, Arial, sans-serif';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(txt, w / 2, h / 2 + 4);
+    });
+    const s = track.sample(track.length * (0.18 + i * 0.22));
+    const arch = new THREE.Group();
+    arch.position.set(s.x, 0, s.z);
+    arch.rotation.y = s.heading;
+    for (const side of [-1, 1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.9, 9, 0.9), metal);
+      post.position.set(side * span, 4.5, 0);
+      post.castShadow = true;
+      arch.add(post);
+    }
+    const mat = new THREE.MeshStandardMaterial({ map: tex, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: night ? 0.8 : 0.15 });
+    const banner = new THREE.Mesh(new THREE.BoxGeometry(span * 2 + 0.9, 2, 0.5), [metal, metal, metal, metal, mat, mat]);
+    banner.position.y = 9;
+    banner.castShadow = true;
+    arch.add(banner);
+    group.add(arch);
+  });
   return group;
 }

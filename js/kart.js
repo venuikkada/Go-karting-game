@@ -3,10 +3,10 @@ import { clamp, damp, lerp, sign } from './utils.js';
 
 // Tunables — arcade feel inspired by mobile racers: fast, grippy, rewarding drifts.
 export const PHYS = {
-  maxSpeed: 62,          // m/s (~225 km/h shown)
-  nitroSpeed: 86,        // m/s while boosting (~310 km/h)
-  accel: 32,
-  nitroAccel: 48,
+  maxSpeed: 75,          // m/s (~270 km/h shown)
+  nitroSpeed: 104,       // m/s while boosting (~375 km/h)
+  accel: 40,
+  nitroAccel: 60,
   brake: 55,
   reverseMax: 12,
   reverseAccel: 18,

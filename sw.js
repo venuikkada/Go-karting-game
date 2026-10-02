@@ -1,5 +1,5 @@
 // Offline cache so the installed app works without a connection.
-const CACHE = 'turbokart-v3';
+const CACHE = 'turbokart-v4';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest', './css/style.css',
   './js/main.js', './js/track.js', './js/scenery.js', './js/kart.js', './js/ai.js',
