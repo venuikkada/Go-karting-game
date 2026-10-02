@@ -83,7 +83,7 @@ js/hud.js             Speedometer, minimap, standings, messages
 js/audio.js           Web Audio sound synthesis
 js/effects.js         Particles, skid marks, speed lines
 sw.js, manifest.webmanifest, icons/   PWA (installable, offline)
-vendor/               three.js r169 + post-processing (MIT)
+lib/                  three.js r169 + post-processing (MIT)
 ```
 
 ---

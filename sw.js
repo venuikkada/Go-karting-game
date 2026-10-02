@@ -1,15 +1,15 @@
 // Offline cache so the installed app works without a connection.
-const CACHE = 'turbokart-v2';
+const CACHE = 'turbokart-v3';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest', './css/style.css',
   './js/main.js', './js/track.js', './js/scenery.js', './js/kart.js', './js/ai.js',
   './js/input.js', './js/hud.js', './js/audio.js', './js/effects.js', './js/utils.js',
-  './vendor/three.module.min.js',
-  './vendor/addons/postprocessing/EffectComposer.js', './vendor/addons/postprocessing/RenderPass.js',
-  './vendor/addons/postprocessing/ShaderPass.js', './vendor/addons/postprocessing/MaskPass.js',
-  './vendor/addons/postprocessing/Pass.js', './vendor/addons/postprocessing/UnrealBloomPass.js',
-  './vendor/addons/postprocessing/OutputPass.js', './vendor/addons/shaders/CopyShader.js',
-  './vendor/addons/shaders/LuminosityHighPassShader.js', './vendor/addons/shaders/OutputShader.js',
+  './lib/three.module.min.js',
+  './lib/addons/postprocessing/EffectComposer.js', './lib/addons/postprocessing/RenderPass.js',
+  './lib/addons/postprocessing/ShaderPass.js', './lib/addons/postprocessing/MaskPass.js',
+  './lib/addons/postprocessing/Pass.js', './lib/addons/postprocessing/UnrealBloomPass.js',
+  './lib/addons/postprocessing/OutputPass.js', './lib/addons/shaders/CopyShader.js',
+  './lib/addons/shaders/LuminosityHighPassShader.js', './lib/addons/shaders/OutputShader.js',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
 ];
 
